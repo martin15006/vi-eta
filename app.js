@@ -29,8 +29,9 @@ let datos = Almacen.datosVacios();
 let soloLectura = false;
 /** ids en el orden en que se muestran ahora mismo (RN-06: no se recalcula con un +1). */
 let ordenActual = [];
-let ultimaAccion = null; // para "Deshacer": { obraAnterior, obraNueva, obraEliminada, mensaje }
 let avisoTimeoutId = null;
+/** id de la obra que el botón "Deshacer" del aviso actual revertiría, si hay uno (CB-34). */
+let idConDeshacerPendiente = null;
 
 // --- Referencias del DOM ---
 
@@ -88,7 +89,46 @@ function iniciar() {
   aplicarFiltro(datos.filtro || 'todas', { guardar: false });
   registrarEventos();
   registrarServiceWorker();
+  pedirAlmacenamientoPersistente(); // CB-13
 }
+
+// --- CB-13: Safari en iOS borra el almacenamiento si la app no está instalada ---
+
+function pedirAlmacenamientoPersistente() {
+  navigator.storage?.persist?.().catch(() => {});
+
+  const esIOS = /iP(hone|ad|od)/.test(navigator.userAgent);
+  const instalada =
+    window.matchMedia?.('(display-mode: standalone)').matches || navigator.standalone === true;
+  if (!esIOS || instalada) return;
+
+  let yaAvisado = false;
+  try {
+    yaAvisado = sessionStorage.getItem('vineta:aviso-ios') === '1';
+  } catch {
+    /* si sessionStorage tampoco anda, avisamos igual */
+  }
+  if (yaAvisado) return;
+
+  mostrarAviso('Instala Viñeta en tu pantalla de inicio para que Safari no borre tus obras.', {
+    duracionMs: 8000,
+  });
+  try {
+    sessionStorage.setItem('vineta:aviso-ios', '1');
+  } catch {
+    /* no pasa nada si no se puede recordar; se vuelve a avisar la próxima vez */
+  }
+}
+
+// --- CB-14: dos pestañas abiertas a la vez ---
+
+window.addEventListener('storage', (evento) => {
+  if (evento.key !== null && evento.key !== Almacen.CLAVE) return;
+  const resultado = Almacen.cargar(storage);
+  datos = resultado.datos;
+  recomputarOrden();
+  render();
+});
 
 // --- Guardado ---
 
@@ -221,6 +261,7 @@ function mostrarBanner(texto) {
 
 function mostrarAviso(texto, { textoBoton = null, alHacerClic = null, duracionMs = 5000 } = {}) {
   if (avisoTimeoutId) clearTimeout(avisoTimeoutId);
+  idConDeshacerPendiente = null; // un aviso nuevo invalida el "Deshacer" del anterior (CB-34)
   el.avisoTexto.textContent = texto;
   if (textoBoton) {
     el.avisoBoton.textContent = textoBoton;
@@ -239,10 +280,16 @@ function mostrarAviso(texto, { textoBoton = null, alHacerClic = null, duracionMs
 
 function ocultarAviso() {
   el.aviso.hidden = true;
+  idConDeshacerPendiente = null;
   if (avisoTimeoutId) {
     clearTimeout(avisoTimeoutId);
     avisoTimeoutId = null;
   }
+}
+
+/** CB-34: si esa obra se edita o se elimina, el "Deshacer" pendiente ya no aplica. */
+function invalidarDeshacerSiEsEsta(id) {
+  if (idConDeshacerPendiente === id) ocultarAviso();
 }
 
 // --- Sumar un capítulo (HU-06, HU-07, HU-08) ---
@@ -277,6 +324,7 @@ function sumarCapitulo(id) {
     textoBoton: 'Deshacer',
     alHacerClic: () => deshacerSumaCapitulo(id, obraAnterior),
   });
+  idConDeshacerPendiente = id;
 }
 
 function deshacerSumaCapitulo(id, obraAnterior) {
@@ -408,6 +456,7 @@ function guardarEdicion(id, valores) {
   datos = { ...datos, obras: datos.obras.map((o) => (o.id === id ? obraFinal : o)) };
   if (cambioAlgo && !persistir(datosAnteriores)) return;
 
+  invalidarDeshacerSiEsEsta(id); // CB-34
   el.dialogoObra.close();
   recomputarOrden();
   if (cambioAlgo) avisarSiQuedaFueraDelFiltro(obraFinal);
@@ -439,6 +488,7 @@ function eliminarObraConfirmada() {
   datos = { ...datos, obras: datos.obras.filter((o) => o.id !== id) };
   el.dialogoConfirmar.close();
   if (!persistir(datosAnteriores)) return;
+  invalidarDeshacerSiEsEsta(id); // CB-34
   recomputarOrden();
   render();
 }
