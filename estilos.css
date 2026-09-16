@@ -1,0 +1,471 @@
+/* estilos.css — identidad "Viñeta fotográfica" (ver DESIGN.md).
+   Tokens en :root, redefinidos por tema en @media (prefers-color-scheme). */
+
+:root {
+  --tinta: oklch(0.2373 0.0215 222.4);
+  --crema: oklch(0.9448 0.0160 82.8);
+  --coral: oklch(0.6536 0.1585 31.9);
+
+  /* Tema claro por defecto */
+  --bg: var(--crema);
+  --superficie: oklch(0.9800 0.0080 85);
+  --superficie-2: oklch(1 0 0);
+  --borde: oklch(0.7500 0.0150 80 / 0.6);
+  --texto: var(--tinta);
+  --texto-tenue: oklch(0.4400 0.0200 220);
+  --acento: oklch(0.6100 0.1650 31.9);
+  --acento-texto: oklch(0.9900 0.0050 80);
+  --peligro: oklch(0.5200 0.1900 25);
+  --peligro-texto: oklch(0.9900 0 0);
+
+  --fuente-titulo: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+  --fuente-ui: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  --radio: 12px;
+  --espacio-1: 0.5rem;
+  --espacio-2: 1rem;
+  --espacio-3: 1.5rem;
+  --espacio-4: 2.5rem;
+
+  --duracion-corta: 150ms;
+  --duracion-media: 200ms;
+  --easing: cubic-bezier(0.16, 1, 0.3, 1); /* ease-out-quint */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: var(--tinta);
+    --superficie: oklch(0.2750 0.0220 220);
+    --superficie-2: oklch(0.3200 0.0230 218);
+    --borde: oklch(0.3800 0.0200 218 / 0.6);
+    --texto: var(--crema);
+    --texto-tenue: oklch(0.7400 0.0180 90);
+    --acento: var(--coral);
+    --acento-texto: oklch(0.1600 0.0100 30);
+    --peligro: oklch(0.6800 0.1900 25);
+    --peligro-texto: oklch(0.1200 0 0);
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: var(--tinta);
+  --superficie: oklch(0.2750 0.0220 220);
+  --superficie-2: oklch(0.3200 0.0230 218);
+  --borde: oklch(0.3800 0.0200 218 / 0.6);
+  --texto: var(--crema);
+  --texto-tenue: oklch(0.7400 0.0180 90);
+  --acento: var(--coral);
+  --acento-texto: oklch(0.1600 0.0100 30);
+  --peligro: oklch(0.6800 0.1900 25);
+  --peligro-texto: oklch(0.1200 0 0);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* El atributo `hidden` tiene que ganarle a cualquier `display` declarado más
+   abajo (.banner, .aviso, etc. usan flex) — si no, queda una franja vacía. */
+[hidden] {
+  display: none !important;
+}
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--texto);
+  font-family: var(--fuente-ui);
+  line-height: 1.5;
+  padding-bottom: calc(var(--espacio-4) * 2);
+}
+
+.saltar-al-contenido {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  background: var(--superficie-2);
+  color: var(--texto);
+  padding: var(--espacio-1) var(--espacio-2);
+  z-index: 100;
+}
+.saltar-al-contenido:focus {
+  left: var(--espacio-2);
+  top: var(--espacio-2);
+}
+
+/* --- Banner persistente (bloqueado / solo lectura / actualización) --- */
+
+.banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espacio-2);
+  flex-wrap: wrap;
+  text-align: center;
+  padding: var(--espacio-1) var(--espacio-2);
+  background: var(--superficie-2);
+  color: var(--texto);
+  font-size: 0.85rem;
+  border-bottom: 1px solid var(--borde);
+}
+
+.banner__boton {
+  font-family: var(--fuente-ui);
+  font-weight: 700;
+  color: var(--acento);
+  background: none;
+  border: none;
+  min-height: 32px;
+  cursor: pointer;
+}
+
+/* --- Encabezado --- */
+
+.encabezado {
+  padding: var(--espacio-4) var(--espacio-3) var(--espacio-2);
+}
+
+.encabezado__titulo {
+  font-family: var(--fuente-titulo);
+  font-size: clamp(1.75rem, 5vw, 2.25rem);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+/* --- Filtros --- */
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-1);
+  padding: 0 var(--espacio-3) var(--espacio-3);
+}
+
+.filtros__boton {
+  font-family: var(--fuente-ui);
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  min-height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--borde);
+  background: transparent;
+  color: var(--texto-tenue);
+  cursor: pointer;
+  transition: background var(--duracion-corta) var(--easing), color var(--duracion-corta) var(--easing);
+}
+
+.filtros__boton[aria-pressed='true'] {
+  background: var(--acento);
+  color: var(--acento-texto);
+  border-color: transparent;
+  font-weight: 600;
+}
+
+.filtros__boton:hover {
+  color: var(--texto);
+}
+
+.filtros__contador {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+  font-size: 0.8em;
+}
+
+.tarjeta-obra__leer {
+  color: var(--acento);
+  text-decoration: none;
+  font-weight: 600;
+}
+.tarjeta-obra__leer:hover {
+  text-decoration: underline;
+}
+
+/* --- Lista y tarjetas de obra --- */
+
+.lista-obras {
+  padding: 0 var(--espacio-3);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--espacio-2);
+}
+
+.lista-obras__vacio {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--texto-tenue);
+  padding: var(--espacio-4) var(--espacio-2);
+}
+
+.lista-obras__vacio .boton {
+  margin-top: var(--espacio-2);
+}
+
+.tarjeta-obra {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  background: var(--superficie);
+  border-radius: var(--radio);
+  padding: var(--espacio-2) var(--espacio-2);
+  overflow: hidden;
+}
+
+/* El difuminado de "viñeta fotográfica": oscurece las esquinas con el color
+   del FONDO de la página (no del acento), como el borde de una foto vieja. */
+.tarjeta-obra__difuminado {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 0 28px -6px var(--bg);
+}
+
+.tarjeta-obra__cuerpo {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+
+.tarjeta-obra__titulo {
+  font-family: var(--fuente-titulo);
+  font-size: 1.05rem;
+  margin: 0 0 0.25rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.tarjeta-obra__meta {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: var(--espacio-1);
+  color: var(--texto-tenue);
+  font-size: 0.85rem;
+}
+
+.tarjeta-obra__capitulo {
+  font-family: var(--fuente-ui);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--texto);
+}
+
+.tarjeta-obra__mas-uno {
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: none;
+  background: var(--acento);
+  color: var(--acento-texto);
+  font-family: var(--fuente-ui);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform var(--duracion-corta) var(--easing);
+}
+
+.tarjeta-obra__mas-uno:active {
+  transform: scale(0.92);
+}
+
+/* --- Botón flotante de agregar --- */
+
+.boton-agregar {
+  position: fixed;
+  right: var(--espacio-3);
+  bottom: var(--espacio-3);
+  min-height: 48px;
+  padding: 0 var(--espacio-3);
+  border-radius: 999px;
+  border: none;
+  background: var(--acento);
+  color: var(--acento-texto);
+  font-family: var(--fuente-ui);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 8px 24px -8px oklch(0 0 0 / 0.4);
+  z-index: 10;
+}
+
+/* --- Botones genéricos --- */
+
+.boton {
+  font-family: var(--fuente-ui);
+  font-size: 0.95rem;
+  font-weight: 600;
+  min-height: 44px;
+  padding: 0 var(--espacio-2);
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.boton--primario {
+  background: var(--acento);
+  color: var(--acento-texto);
+}
+
+.boton--secundario {
+  background: transparent;
+  border-color: var(--borde);
+  color: var(--texto);
+}
+
+.boton--peligro {
+  background: var(--peligro);
+  color: var(--peligro-texto);
+}
+
+/* --- Diálogo de agregar/editar obra --- */
+
+.dialogo-obra,
+.dialogo-confirmar {
+  border: none;
+  border-radius: var(--radio);
+  padding: var(--espacio-3);
+  background: var(--superficie-2);
+  color: var(--texto);
+  width: min(420px, calc(100vw - 2rem));
+}
+
+.dialogo-obra::backdrop,
+.dialogo-confirmar::backdrop {
+  background: oklch(0 0 0 / 0.5);
+}
+
+.dialogo-obra h2 {
+  font-family: var(--fuente-titulo);
+  margin-top: 0;
+}
+
+.campo {
+  display: block;
+  margin-bottom: var(--espacio-2);
+}
+
+.campo__etiqueta {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--texto-tenue);
+  margin-bottom: 0.25rem;
+}
+
+.campo input,
+.campo select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--borde);
+  background: var(--bg);
+  color: var(--texto);
+  font-family: var(--fuente-ui);
+  font-size: 1rem;
+}
+
+.campo__error {
+  display: block;
+  min-height: 1.1em;
+  color: var(--peligro);
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.campo__error-boton {
+  font-family: var(--fuente-ui);
+  font-weight: 700;
+  color: var(--acento);
+  background: none;
+  border: none;
+  padding: 0;
+  margin-left: 0.4em;
+  cursor: pointer;
+  font-size: inherit;
+}
+
+.dialogo-obra__acciones {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-2);
+  margin-top: var(--espacio-3);
+}
+
+.dialogo-obra__acciones-derecha {
+  display: flex;
+  gap: var(--espacio-1);
+}
+
+.dialogo-confirmar__acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--espacio-1);
+  margin-top: var(--espacio-2);
+}
+
+/* --- Aviso / deshacer --- */
+
+.aviso {
+  position: fixed;
+  left: var(--espacio-2);
+  right: var(--espacio-2);
+  bottom: var(--espacio-2);
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-2);
+  background: var(--superficie-2);
+  color: var(--texto);
+  border-radius: var(--radio);
+  padding: var(--espacio-2);
+  box-shadow: 0 8px 24px -8px oklch(0 0 0 / 0.4);
+  animation: aviso-entrada var(--duracion-media) var(--easing);
+}
+
+.aviso__boton {
+  font-family: var(--fuente-ui);
+  font-weight: 700;
+  color: var(--acento);
+  background: none;
+  border: none;
+  min-height: 44px;
+  padding: 0 0.5rem;
+  cursor: pointer;
+}
+
+@keyframes aviso-entrada {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aviso {
+    animation: none;
+  }
+  .tarjeta-obra__mas-uno:active {
+    transform: none;
+  }
+  * {
+    transition-duration: 0.001ms !important;
+  }
+}

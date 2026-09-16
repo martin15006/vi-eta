@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Viñeta</title>
+  <meta name="description" content="Registro personal de lecturas: manhwa, cómics, novelas y libros. Sabé en qué capítulo vas de cada uno." />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'" />
+  <meta name="theme-color" content="#f2ece1" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#132126" media="(prefers-color-scheme: dark)" />
+
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="iconos/icono.svg" type="image/svg+xml" />
+  <link rel="icon" href="iconos/icono-192.png" sizes="192x192" type="image/png" />
+  <link rel="apple-touch-icon" href="iconos/icono-180.png" />
+
+  <link rel="stylesheet" href="estilos.css" />
+</head>
+<body>
+  <a class="saltar-al-contenido" href="#lista-obras">Saltar al contenido</a>
+
+  <div id="banner" class="banner" role="status" hidden>
+    <span id="banner-texto"></span>
+    <button type="button" id="banner-boton" class="banner__boton" hidden></button>
+  </div>
+
+  <header class="encabezado">
+    <h1 class="encabezado__titulo">Viñeta</h1>
+  </header>
+
+  <nav class="filtros" aria-label="Filtrar por estado" id="filtros">
+    <button type="button" class="filtros__boton" data-filtro="todas" aria-pressed="true">
+      Todas <span class="filtros__contador" data-contador="todas"></span>
+    </button>
+    <button type="button" class="filtros__boton" data-filtro="leyendo" aria-pressed="false">
+      Leyendo <span class="filtros__contador" data-contador="leyendo"></span>
+    </button>
+    <button type="button" class="filtros__boton" data-filtro="pausa" aria-pressed="false">
+      En pausa <span class="filtros__contador" data-contador="pausa"></span>
+    </button>
+    <button type="button" class="filtros__boton" data-filtro="terminado" aria-pressed="false">
+      Terminado <span class="filtros__contador" data-contador="terminado"></span>
+    </button>
+  </nav>
+
+  <main id="lista-obras" class="lista-obras" aria-live="polite" aria-atomic="false">
+    <!-- app.js llena esto con tarjetas clonadas de #plantilla-obra, o con el estado vacío -->
+  </main>
+
+  <button type="button" id="boton-agregar" class="boton-agregar" aria-haspopup="dialog">
+    <span aria-hidden="true">+</span> Agregar obra
+  </button>
+
+  <dialog id="dialogo-obra" class="dialogo-obra" aria-labelledby="dialogo-obra__titulo">
+    <form id="formulario-obra" method="dialog" novalidate>
+      <h2 id="dialogo-obra__titulo">Agregar obra</h2>
+
+      <input type="hidden" id="obra-id" name="id" />
+
+      <label class="campo">
+        <span class="campo__etiqueta">Título</span>
+        <input type="text" id="obra-titulo" name="titulo" maxlength="100" autocomplete="off" required aria-describedby="error-titulo" />
+        <span class="campo__error" id="error-titulo" role="alert">
+          <span id="error-titulo-texto"></span>
+          <button type="button" id="boton-ver-obra" class="campo__error-boton" hidden>Ver obra</button>
+        </span>
+      </label>
+
+      <label class="campo">
+        <span class="campo__etiqueta">Capítulo actual</span>
+        <input type="text" inputmode="decimal" id="obra-capitulo" name="capitulo" placeholder="0" aria-describedby="error-capitulo" />
+        <span class="campo__error" id="error-capitulo" role="alert"></span>
+      </label>
+
+      <label class="campo">
+        <span class="campo__etiqueta">Estado</span>
+        <select id="obra-estado" name="estado">
+          <option value="leyendo">Leyendo</option>
+          <option value="pausa">En pausa</option>
+          <option value="terminado">Terminado</option>
+        </select>
+      </label>
+
+      <label class="campo">
+        <span class="campo__etiqueta">Enlace de lectura (opcional)</span>
+        <input type="url" id="obra-enlace" name="enlace" placeholder="https://…" maxlength="500" aria-describedby="error-enlace" />
+        <span class="campo__error" id="error-enlace" role="alert"></span>
+      </label>
+
+      <div class="dialogo-obra__acciones">
+        <button type="button" id="boton-eliminar" class="boton boton--peligro" hidden>
+          Eliminar
+        </button>
+        <div class="dialogo-obra__acciones-derecha">
+          <button type="button" id="boton-cancelar" class="boton boton--secundario">
+            Cancelar
+          </button>
+          <button type="submit" id="boton-guardar" class="boton boton--primario">
+            Guardar
+          </button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dialogo-confirmar" class="dialogo-confirmar" aria-labelledby="dialogo-confirmar__texto">
+    <p id="dialogo-confirmar__texto"></p>
+    <div class="dialogo-confirmar__acciones">
+      <button type="button" id="confirmar-cancelar" class="boton boton--secundario" autofocus>
+        Cancelar
+      </button>
+      <button type="button" id="confirmar-aceptar" class="boton boton--peligro">
+        Eliminar
+      </button>
+    </div>
+  </dialog>
+
+  <div id="aviso" class="aviso" role="status" aria-live="polite" hidden>
+    <span id="aviso-texto"></span>
+    <button type="button" id="aviso-boton" class="aviso__boton" hidden></button>
+  </div>
+
+  <template id="plantilla-obra">
+    <article class="tarjeta-obra">
+      <div class="tarjeta-obra__difuminado" aria-hidden="true"></div>
+      <div class="tarjeta-obra__cuerpo">
+        <p class="tarjeta-obra__titulo"></p>
+        <p class="tarjeta-obra__meta">
+          <span class="tarjeta-obra__capitulo"></span>
+          <span class="tarjeta-obra__estado"></span>
+          <a class="tarjeta-obra__leer" target="_blank" rel="noopener noreferrer" hidden>Leer</a>
+        </p>
+      </div>
+      <button type="button" class="tarjeta-obra__mas-uno" aria-label="Sumar un capítulo">+1</button>
+    </article>
+  </template>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "name": "vineta",
+  "private": true,
+  "type": "module",
+  "description": "Registro personal de lecturas — manhwa, cómics y libros. PWA sin backend, sin build.",
+  "scripts": {
+    "test": "node --test tests/obras.test.js tests/almacen.test.js"
+  }
+}
